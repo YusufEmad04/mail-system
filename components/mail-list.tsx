@@ -24,6 +24,7 @@ export default function MailList({ selectedEmail, setSelectedEmail }: MailListPr
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Main fetch function that shows loading state - for initial load
     const fetchEmails = async () => {
       try {
         setLoading(true)
@@ -46,7 +47,33 @@ export default function MailList({ selectedEmail, setSelectedEmail }: MailListPr
       }
     }
 
+    // Background refresh function that doesn't show loading state
+    const refreshEmailsSilently = async () => {
+      try {
+        const response = await fetch('/api/mails')
+
+        if (!response.ok) {
+          console.error('Failed to refresh emails')
+          return
+        }
+
+        const data = await response.json()
+        setInboxEmails(data.inbox || [])
+        setOpenedEmails(data.opened || [])
+        setSentEmails(data.sent || [])
+      } catch (err) {
+        console.error('Error refreshing emails:', err)
+      }
+    }
+
+    // Initial fetch with loading indicator
     fetchEmails()
+
+    // Set up interval to refresh emails silently every 3 seconds
+    const intervalId = setInterval(refreshEmailsSilently, 3000)
+
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId)
   }, [])
 
   const handleEmailClick = async (email: any) => {
