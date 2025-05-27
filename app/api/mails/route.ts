@@ -153,8 +153,11 @@ export async function POST(request: Request) {
             attachments: body.attachments || [],
         });
 
-        // Update inbox of recipients
-        for (const recipientEmail of body.to) {
+        // Combine 'to', 'cc' and 'bcc' recipients for delivery
+        const allRecipients = [...body.to, ...(body.cc || []), ...(body.bcc || [])];
+
+        // Update inbox of all recipients (both 'to', 'cc', and 'bcc')
+        for (const recipientEmail of allRecipients) {
             try {
                 // Find recipient user by email
                 const recipientUser = await User.findOne({ email: recipientEmail });

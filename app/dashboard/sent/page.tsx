@@ -13,7 +13,7 @@ export default function SentPage() {
     <DashboardLayout>
       <div className="flex h-full flex-col md:flex-row">
         <SentMailList />
-        <MailPreview />
+        <MailPreview email={""} />
       </div>
     </DashboardLayout>
   )

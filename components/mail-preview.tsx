@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Reply, Forward, Trash2, Archive, Star, Download, Paperclip, MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-// This component now receives the selected email as a prop
+// This component receives the selected email as a prop
 export default function MailPreview({ email }) {
   const [isComposing, setIsComposing] = useState(false)
   const [replyText, setReplyText] = useState("")
@@ -15,6 +15,27 @@ export default function MailPreview({ email }) {
   const [cc, setCc] = useState("")
   const [bcc, setBcc] = useState("")
   const [subject, setSubject] = useState("")
+  const [currentUserEmail, setCurrentUserEmail] = useState("")
+
+  // Fetch current user's email when component mounts
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        // Fetch user profile from API
+        const response = await fetch('/api/user/profile');
+        if (response.ok) {
+          const userData = await response.json();
+          setCurrentUserEmail(userData.email);
+        } else {
+          console.error('Failed to fetch user profile');
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   const handleReply = () => {
     setIsComposing(true)
@@ -53,6 +74,9 @@ export default function MailPreview({ email }) {
     const date = new Date(dateString)
     return date.toLocaleString()
   }
+
+  // Check if the current user is the sender of the email
+  const isCurrentUserSender = email && currentUserEmail === email.from;
 
   if (isComposing) {
     return (
@@ -195,7 +219,8 @@ export default function MailPreview({ email }) {
                     <span>{formatEmailList(email.cc)}</span>
                   </div>
                 )}
-                {email.bcc && email.bcc.length > 0 && (
+                {/* Only show BCC if current user is the sender */}
+                {isCurrentUserSender && email.bcc && email.bcc.length > 0 && (
                   <div className="flex flex-wrap items-center gap-1">
                     <span className="font-medium">BCC:</span>
                     <span>{formatEmailList(email.bcc)}</span>

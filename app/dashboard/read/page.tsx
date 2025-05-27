@@ -13,7 +13,7 @@ export default function ReadPage() {
     <DashboardLayout>
       <div className="flex h-full flex-col md:flex-row">
         <ReadMailList />
-        <MailPreview />
+        <MailPreview email={""} />
       </div>
     </DashboardLayout>
   )
